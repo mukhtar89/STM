@@ -8,7 +8,7 @@ public abstract class AtomicObject<T extends Copyable<T>> {
         internalInit = init;
         internalClass = (Class<T>) init.getClass();
     }
-    public abstract T openRead();
-    public abstract T openWrite();
+    public abstract T openRead() throws Exception;
+    public abstract T openWrite() throws Exception;
     public abstract boolean validate();
 }

@@ -1,17 +1,19 @@
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Created by Mukhtar on 11/3/2015.
  */
 public class TNode<T> implements Node<T> {
 
     AtomicObject<SNode<T>> atomic;
-
+    
     public TNode(T myItem) {
-        atomic = new LockObject<SNode<T>>(new SNode<>(myItem));
+        atomic = new LockObject<>(new SNode<>(myItem));
     }
 
     @Override
     public T getItem() {
-        return null;
+        return (T) atomic.internalInit;
     }
 
     @Override
@@ -20,12 +22,22 @@ public class TNode<T> implements Node<T> {
     }
 
     @Override
-    public AtomicArray<Node<T>> getNext() {
-        return null;
+    public AtomicReference<Node<T>> getNext() {
+        AtomicReference<Node<T>> next = null;
+        try {
+            next =  atomic.openRead().getNext();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return next;
     }
 
     @Override
-    public void setNext(AtomicArray<Node<T>> value) {
-
+    public void setNext(AtomicReference<Node<T>> value) {
+        try {
+            atomic.openWrite().setNext(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
