@@ -2,12 +2,17 @@
 public abstract class ContentionManager {
 
 	static ThreadLocal<ContentionManager> local = new ThreadLocal<ContentionManager>() {
-		protected ContentionManager initialValue() throws Exception {
+		protected ContentionManager initialValue() {
+			ContentionManager manager = null;
 			try {
-				return (ContentionManager) Defaults.
-			} catch (Exception e) {
-				throw new PanicException(e);
+				//TODO
+				manager = ContentionManager.class.newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
 			}
+			return manager;
 		}
 	};
 	

@@ -25,6 +25,10 @@ public class TLinkedList<T> {
 		if (head == tail)
 			return false;
 		Node<T> runner = head;
+		if (head.getItem() == value) {
+			head.setNext(head.getNext());
+			return true;
+		}
 		while (runner.getNext().get() != null) {
 			if (runner.getNext().get().getNext().get() == value) {
 				runner.getNext().set(runner.getNext().get().getNext().get());
