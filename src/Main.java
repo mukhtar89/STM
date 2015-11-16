@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 import java.util.HashSet;
 import java.util.Random;
 import java.util.concurrent.Callable;
+=======
+/* STM basic test */
+>>>>>>> origin/master
 
 public class Main {
 	
