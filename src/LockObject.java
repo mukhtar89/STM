@@ -82,54 +82,65 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     	}
     }
     
-    public class onValidate implements Callable<Boolean> {
+    public Callable<Boolean> onValidate() {
 
-		private static final long TIMEOUT = 0;
-
-		@Override
-		public Boolean call() throws Exception {
-			WriteSet writeSet = WriteSet.getLocal();
-			ReadSet readSet = ReadSet.getLocal();
-			if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
-				return false;
-			}
-			for (LockObject<?> x : readSet.getList()) {
-				if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread())
-					return false;
-				if (stamp > VersionClock.getReadStamp())
-					return false;
-			}
-			return true;
-		}
-    	
-    }
-    
-    public class OnCommit implements Runnable {
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public void run() {
-			try {
+		final long TIMEOUT = 0;
+		Callable<Boolean> retCallable = new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
 				WriteSet writeSet = WriteSet.getLocal();
 				ReadSet readSet = ReadSet.getLocal();
-				VersionClock.setWriteStamp();
-				long writeVersion = VersionClock.getWriteStamp();
-				for (Map.Entry<LockObject<?>,Object> entry : WriteSet.getList()) {
-					LockObject<?> key = (LockObject<?>) entry.getKey();
-					Copyable<?> destination = (Copyable<?>) key.openRead();
-					Copyable<Copyable<?>> source = (Copyable<Copyable<?>>) entry.getValue();
-					source.copyTo(destination);
-					key.stamp = writeVersion;
+				if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
+					return false;
 				}
-				writeSet.unlock();
-				writeSet.clear();
-				readSet.clear();
-			} catch (AbortedException | PanicException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				for (LockObject<?> x : readSet.getList()) {
+					if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread())
+						return false;
+					if (stamp > VersionClock.getReadStamp())
+						return false;
+				}
+				return true;
 			}
-		}
+		};
+		return retCallable;
     }
+
+	@Override
+	public Runnable onCommit() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				try {
+					WriteSet writeSet = WriteSet.getLocal();
+					ReadSet readSet = ReadSet.getLocal();
+					VersionClock.setWriteStamp();
+					long writeVersion = VersionClock.getWriteStamp();
+					for (Map.Entry<LockObject<?>,Object> entry : WriteSet.getList()) {
+						LockObject<?> key = entry.getKey();
+						Copyable<?> destination = key.openRead();
+						Copyable<Copyable<?>> source = (Copyable<Copyable<?>>) entry.getValue();
+						source.copyTo(destination);
+						key.stamp = writeVersion;
+					}
+					writeSet.unlock();
+					writeSet.clear();
+					readSet.clear();
+				} catch (AbortedException | PanicException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+	}
+
+	@Override
+	public Runnable onAbort() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				while(!Transaction.getLocal().abort());
+			}
+		};
+	}
     
     public void lock() {
     	//TODO Definition of lock

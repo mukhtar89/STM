@@ -1,10 +1,9 @@
-<<<<<<< HEAD
+
 import java.util.HashSet;
 import java.util.Random;
 import java.util.concurrent.Callable;
-=======
+
 /* STM basic test */
->>>>>>> origin/master
 
 public class Main {
 	
@@ -13,30 +12,30 @@ public class Main {
 	
 	public static class Produce<T> implements Callable<T> {
 		
-		private T value;
+		private Node<T> node;
 		
-		public Produce(T val) {
-			this.value = val;
+		public Produce(Node<T> node) {
+			this.node = node;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.add((Integer) value);
+			linkedList.add((Node<Integer>) node);
 			return null;
 		}
 	}
 	
 	public static class Consume<T> implements Callable<T> {
-		
-		private T value;
-		
-		public Consume(T val) {
-			this.value = val;
+
+		private Node<T> node;
+
+		public Consume(Node<T> node) {
+			this.node = node;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.remove((Integer) value);
+			linkedList.remove((Node<Integer>) node);
 			return null;
 		}
 	}
@@ -49,14 +48,17 @@ public class Main {
         Callable<Integer> paction = null, caction = null;
         for (int i=0; i<NUM_THREADS; i++) {
         	int inserted = random.nextInt(i+1);
-        	paction = new Produce<Integer>(inserted);
-        	pro[i] = new TThread();
+			TNode<Integer> temp = new TNode<>(inserted);
+        	paction = new Produce<>(temp);
+        	pro[i] = new TThread(temp.atomic);
         	pro[i].doIt(paction);
         	produced.add(inserted);
         	if (produced.size() > 2) {
         		produced.toArray(producedArray);
-        		caction = new Consume<Integer>(producedArray[random.nextInt(i)]);
-        		con[i] = new TThread();
+				int toRemove = producedArray[random.nextInt(i)];
+				temp = (TNode<Integer>) linkedList.nodeMap.get(toRemove);
+        		caction = new Consume<Integer>(temp);
+        		con[i] = new TThread(temp.atomic);
             	con[i].doIt(caction);
         	}
         	pro[i].join();
