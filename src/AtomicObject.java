@@ -6,11 +6,11 @@ import java.util.concurrent.Callable;
  * Created by Mukhtar on 11/3/2015.
  */
 public abstract class AtomicObject<T> {
-    protected Class<T> internalClass;
+    protected Class internalClass;
     protected T internalInit;
     public AtomicObject(T init) {
         internalInit = init;
-        internalClass = (Class<T>) init.getClass();
+        internalClass = init.getClass();
     }
     public abstract T openRead() throws Exception;
     public abstract T openWrite() throws Exception;

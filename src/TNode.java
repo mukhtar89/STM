@@ -13,12 +13,22 @@ public class TNode<T> implements Node<T> {
 
     @Override
     public T getItem() {
-        return (T) atomic.internalInit;
+        T item = null;
+        try {
+            item = atomic.openRead().getItem();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return item;
     }
 
     @Override
     public void setItem(T value) {
-
+        try {
+            atomic.openWrite().setItem(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

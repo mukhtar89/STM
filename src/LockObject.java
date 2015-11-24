@@ -14,6 +14,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 
     public LockObject(T init) {
         super(init);
+		version = internalInit;
 		lock = new ReentrantLock();
     }
 
@@ -55,9 +56,13 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		if (scratch == null) {
     			if (lock.isLocked()) 
     				throw new AbortedException();
-    			scratch = new LockObject<T>(null).internalInit;
-    			version.copyTo(scratch);
-    			WriteSet.put(this, scratch);
+				try {
+					scratch = (T) internalClass.newInstance();
+					version.copyTo(scratch);
+					WriteSet.put(this, scratch);
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
     		}
     		return scratch;
     	case ABORTED:

@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Transaction {
 	
 	public enum Status {ABORTED, ACTIVE, COMMITTED};
-	public static Transaction COMMITTED = new Transaction(Status.COMMITTED);
+	//public static Transaction COMMITTED = new Transaction(Status.COMMITTED);
 	private final AtomicReference<Status> status;
 	static ThreadLocal<Transaction> local = new ThreadLocal<Transaction>() {
 		protected Transaction initialValue() {
