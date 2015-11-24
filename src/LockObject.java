@@ -14,6 +14,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 
     public LockObject(T init) {
         super(init);
+		lock = new ReentrantLock();
     }
 
     @SuppressWarnings("unchecked")
@@ -33,8 +34,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         		return version;
         	}
         	else {
-        		T scratch = (T) writeSet.get(this);
-        		return scratch;
+        		return (T) writeSet.get(this);
         	}
         case ABORTED:
         	throw new AbortedException();
@@ -85,7 +85,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     public Callable<Boolean> onValidate() {
 
 		final long TIMEOUT = 0;
-		Callable<Boolean> retCallable = new Callable<Boolean>() {
+		return new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
 				WriteSet writeSet = WriteSet.getLocal();
@@ -102,7 +102,6 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 				return true;
 			}
 		};
-		return retCallable;
     }
 
 	@Override

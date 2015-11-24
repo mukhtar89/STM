@@ -62,7 +62,8 @@ public class Main {
             	con[i].doIt(caction);
         	}
         	pro[i].join();
-        	con[i].join();
+			if (produced.size() > 2)
+				con[i].join();
         }
     }
 }

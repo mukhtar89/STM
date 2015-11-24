@@ -16,12 +16,13 @@ public class TLinkedList<T> {
 	public void add(Node<T> value) {
 		nodeMap.put(value.getItem(), value);
 		if (head == null) {
-			head.set(value);
+			head = new AtomicReference<>(value);
 			tail = head;
 		}
 		else {
-			tail.get().getNext().set(value);
-			tail.set(value);
+			AtomicReference<Node<T>> temp = new AtomicReference<>(value);
+			tail.get().setNext(temp);
+			tail = temp;
 		}
 	}
 	

@@ -1,16 +1,16 @@
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 
 public class TThread<T> extends java.lang.Thread {
 
-	private AtomicObject<Node<T>> object;
-	private Runnable onAbort;// = object.onAbort();
-	private Runnable onCommit;// = object.onCommit();
-	private Callable<Boolean> onValidate;// = object.onValidate();
+	private Runnable onAbort;
+	private Runnable onCommit;
+	private Callable<Boolean> onValidate;
 
 	public TThread(AtomicObject<Node<T>> object) {
-		this.object = object;
+		onAbort = object.onAbort();
+		onCommit = object.onCommit();
+		onValidate = object.onValidate();
 	}
 
 	public <T> T doIt(Callable<T> xaction) throws Exception {
