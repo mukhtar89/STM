@@ -15,7 +15,7 @@ public abstract class AtomicObject<T> {
     public abstract T openRead() throws Exception;
     public abstract T openWrite() throws Exception;
     public abstract boolean validate();
-    public abstract Callable<Boolean> onValidate();
+    public abstract Callable<Boolean> onValidate(Transaction me);
     public abstract Runnable onCommit();
     public abstract Runnable onAbort();
 }

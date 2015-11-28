@@ -34,7 +34,8 @@ public class WriteSet {
 				for (LockObject<?> y : stack) {
 					y.unlock();
 				}
-				throw new AbortedException();
+				//throw new AbortedException();
+				return false;
 			}
 		}
 		return true;

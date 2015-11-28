@@ -56,14 +56,15 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		if (scratch == null) {
     			if (lock.isLocked()) 
     				throw new AbortedException();
-				try {
-					scratch = (T) internalClass.newInstance();
+				//try {
+					//scratch = (T) internalClass.getDeclaredConstructor().newInstance(version);
+					scratch = (T) new SNode<>(internalInit);
 					version.copyTo(scratch);
 					WriteSet.put(this, scratch);
-				} catch (InstantiationException | IllegalAccessException e) {
+				/*} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 					e.printStackTrace();
-				}
-    		}
+				}*/
+			}
     		return scratch;
     	case ABORTED:
         	throw new AbortedException();
@@ -87,7 +88,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     	}
     }
     
-    public Callable<Boolean> onValidate() {
+    public Callable<Boolean> onValidate(Transaction me) {
 
 		final long TIMEOUT = 0;
 		return new Callable<Boolean>() {
@@ -96,7 +97,10 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 				WriteSet writeSet = WriteSet.getLocal();
 				ReadSet readSet = ReadSet.getLocal();
 				if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
-					return false;
+					//return false;
+					//TODO: Call Contention Manager here
+					ContentionManager contentionManager = ContentionManager.getLocal();
+					contentionManager.resolve(me, Transaction.getLocal());
 				}
 				for (LockObject<?> x : readSet.getList()) {
 					if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread())
@@ -147,20 +151,21 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 	}
     
     public void lock() {
-    	//TODO Definition of lock
+    	lock.lock();
     }
     
 	public void unlock(){
-		//TODO Definition of lock
+		lock.unlock();
 	}
 	
 	public boolean tryLock(long timeout, TimeUnit timeUnit) {
 		//TODO Definition of lock
-		return false;
-	}
-	
-	public boolean tryUnlock(long timeout, TimeUnit timeUnit) {
-		//TODO Definition of lock
-		return false;
+		boolean retValue = false;
+		try {
+			retValue = lock.tryLock(timeout, timeUnit);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return retValue;
 	}
 }

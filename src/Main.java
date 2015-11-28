@@ -2,12 +2,15 @@
 import java.util.HashSet;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 
 /* STM basic test */
 
 public class Main {
 	
 	public static TLinkedList<Integer> linkedList = new TLinkedList<>();
+	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
 	private static Integer NUM_THREADS = 100;
 	
 	public static class Produce<T> implements Callable<T> {
@@ -15,12 +18,14 @@ public class Main {
 		private Node<T> node;
 		
 		public Produce(Node<T> node) {
+			LOGGER.info("Adding Node with value : " + node.getItem());
 			this.node = node;
 		}
 
 		@Override
 		public T call() throws Exception {
 			linkedList.add((Node<Integer>) node);
+			LOGGER.info("Calling Produce Callable: " + node.getItem());
 			return null;
 		}
 	}
@@ -30,12 +35,14 @@ public class Main {
 		private Node<T> node;
 
 		public Consume(Node<T> node) {
+			LOGGER.info("Deleting Node with value : " + node.getItem());
 			this.node = node;
 		}
 
 		@Override
 		public T call() throws Exception {
 			linkedList.remove((Node<Integer>) node);
+			LOGGER.info("Calling Consume Callable: " + node.getItem());
 			return null;
 		}
 	}
