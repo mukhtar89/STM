@@ -9,9 +9,10 @@ import java.util.logging.Logger;
 public class Main {
 	
 	public static TLinkedList<Integer> linkedList = new TLinkedList<>();
-	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+	private static Logger LOGGER = Logger.getLogger(Main.class.getName());
+	private static LoggerFwk logfwk;
 
-	private static Integer NUM_THREADS = 100;
+	private static Integer NUM_THREADS = 5;
 	
 	public static class Produce<T> implements Callable<T> {
 		
@@ -51,6 +52,8 @@ public class Main {
         TThread[] pro = new TThread[NUM_THREADS], con = new TThread[NUM_THREADS];
         HashSet<Integer> produced = new HashSet<>();
         Integer[] producedArray = new Integer[NUM_THREADS];
+		logfwk = new LoggerFwk();
+		LOGGER = logfwk.logHandler(LOGGER);
         Random random = new Random();
         Callable<Integer> paction = null, caction = null;
         for (int i=0; i<NUM_THREADS; i++) {

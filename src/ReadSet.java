@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ReadSet {
 
@@ -9,6 +10,7 @@ public class ReadSet {
 			return new ReadSet();
 		}
 	};
+	private static final Logger LOGGER = Logger.getLogger(ReadSet.class.getName());
 	
 	public static ReadSet getLocal() {
 		return local.get();
@@ -19,6 +21,7 @@ public class ReadSet {
 	}
 	
 	public void add(LockObject<?> lockObj) {
+		LOGGER.info("Adding object to ReadSet");
 		local.get().dataSet.add(lockObj);
 	}
 	
