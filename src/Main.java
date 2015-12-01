@@ -16,34 +16,34 @@ public class Main {
 	
 	public static class Produce<T> implements Callable<T> {
 		
-		private T value;
+		private Node<T> node;
 		
-		public Produce(T value) {
-			LOGGER.info("Adding Node with value : " + value);
-			this.value = value;
+		public Produce(Node<T> node) {
+			LOGGER.info("Adding Node with value : " + node.getItem());
+			this.node = node;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.add(value);
-			LOGGER.info("Calling Produce Callable: " + value);
+			linkedList.add((Node<Integer>) node);
+			LOGGER.info("Calling Produce Callable: " + node.getItem());
 			return null;
 		}
 	}
 	
 	public static class Consume<T> implements Callable<T> {
 
-		private T value;
+		private Node<T> node;
 
-		public Consume(T value) {
-			LOGGER.info("Deleting Node with value : " + value);
-			this.value = value;
+		public Consume(Node<T> node) {
+			LOGGER.info("Deleting Node with value : " + node.getItem());
+			this.node = node;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.remove(value);
-			LOGGER.info("Calling Consume Callable: " + value);
+			linkedList.remove((Node<Integer>) node);
+			LOGGER.info("Calling Consume Callable: " + node.getItem());
 			return null;
 		}
 	}
@@ -67,7 +67,7 @@ public class Main {
         		produced.toArray(producedArray);
 				int toRemove = producedArray[random.nextInt(i)];
 				temp = (TNode<Integer>) linkedList.nodeMap.get(toRemove);
-        		caction = new Consume<Integer>(temp);
+        		caction = new Consume<>(temp);
         		con[i] = new TThread(temp);
             	con[i].doIt(caction);
         	}
