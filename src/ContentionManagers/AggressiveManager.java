@@ -8,6 +8,6 @@ import STM.Transaction;
 public class AggressiveManager extends ContentionManager {
     @Override
     public void resolve(Transaction me, Transaction other) {
-
+        other.abort();
     }
 }

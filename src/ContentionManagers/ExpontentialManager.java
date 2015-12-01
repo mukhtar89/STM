@@ -8,6 +8,6 @@ import STM.Transaction;
 public class ExpontentialManager extends ContentionManager {
     @Override
     public void resolve(Transaction me, Transaction other) {
-        other.abort();
+
     }
 }

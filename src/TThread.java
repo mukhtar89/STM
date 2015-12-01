@@ -1,11 +1,13 @@
-package STM.Atomic;
+package STM;
 
+import STM.Atomic.Copyable;
+import STM.Atomic.LockObject;
+import STM.Atomic.ReadSet;
+import STM.Atomic.WriteSet;
 import STM.ContentionManagers.BackOffManager;
 import STM.ContentionManagers.ContentionManager;
 import STM.Exceptions.AbortedException;
 import STM.Exceptions.PanicException;
-import STM.Transaction;
-import STM.VersionClock;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

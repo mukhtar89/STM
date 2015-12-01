@@ -1,6 +1,6 @@
 package STM;
 
-import STM.Atomic.TThread;
+import STM.DataStructure.TLLinkedList;
 import STM.DataStructure.TLinkedList;
 
 import java.util.Random;
@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class Main {
 	
-	public static TLinkedList<Integer> linkedList = new TLinkedList<>();
+	public static TLLinkedList<Integer> linkedList = new TLLinkedList<>(Integer.MIN_VALUE, Integer.MAX_VALUE);
 	private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 	private static Integer NUM_THREADS = 10;

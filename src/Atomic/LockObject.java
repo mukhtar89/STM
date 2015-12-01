@@ -15,10 +15,10 @@ import java.util.logging.Logger;
  */
 public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 	
-	protected ReentrantLock lock;
-	protected volatile long stamp;
+	public ReentrantLock lock;
+	public volatile long stamp;
 	private volatile T version;
-	protected Transaction creator;
+	public Transaction creator;
 	private static Logger LOGGER = Logger.getLogger(LockObject.class.getName());
 
     public LockObject(T init) {

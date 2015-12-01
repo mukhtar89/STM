@@ -7,12 +7,13 @@ import STM.Exceptions.AbortedException;
 /**
  * Created by Mukhtar on 11/3/2015.
  */
-public class TNode<T> implements Node<T> {
+public class TLNode<T> implements LNode<T> {
 
-    AtomicObject<SNode<T>> atomic;
-    
-    public TNode(T myItem) {
-        atomic = new LockObject<>(new SNode<>(myItem));
+    AtomicObject<SLNode<T>> atomic;
+
+    public TLNode() {}
+    public TLNode(T myItem) {
+        atomic = new LockObject<>(new SLNode<>(myItem));
     }
 
     @Override
@@ -36,8 +37,8 @@ public class TNode<T> implements Node<T> {
     }
 
     @Override
-    public Node<T> getNext() {
-        Node<T> retNode = null;
+    public LNode<T> getNext() {
+        LNode<T> retNode = null;
         try {
             retNode = atomic.openRead().getNext();
             if (!atomic.validate())
@@ -48,16 +49,38 @@ public class TNode<T> implements Node<T> {
         return retNode;
     }
 
+    @Override
+    public LNode<T> getPrev() {
+        LNode<T> retNode = null;
+        try {
+            retNode = atomic.openRead().getPrev();
+            if (!atomic.validate())
+                throw new AbortedException();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return retNode;
+    }
+
 
     @Override
-    public void setNext(Node<T> value) {
+    public void setNext(LNode<T> value) {
         try {
             atomic.openWrite().setNext(value);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    //latest additions..
+
+    public void setPrev(LNode<T> value) {
+        try {
+            atomic.openWrite().setPrev(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*    //latest additions..
     public SNode<T> get() {
         SNode<T> temp = null;
         try {
@@ -75,4 +98,5 @@ public class TNode<T> implements Node<T> {
             e.printStackTrace();
         }
     }
+    */
 }
