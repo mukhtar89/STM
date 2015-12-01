@@ -1,5 +1,6 @@
-import java.util.concurrent.atomic.AtomicReference;
+package STM;
 
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Transaction {
 	

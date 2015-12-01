@@ -1,3 +1,6 @@
+package STM.ContentionManagers;
+
+import STM.Transaction;
 
 public abstract class ContentionManager {
 

@@ -1,6 +1,11 @@
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.Callable;
+package STM.Atomic;
+
+import STM.ContentionManagers.ContentionManager;
+import STM.Exceptions.AbortedException;
+import STM.Exceptions.PanicException;
+import STM.Transaction;
+import STM.VersionClock;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -26,7 +31,6 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     @SuppressWarnings("unchecked")
 	@Override
     public T openRead() throws AbortedException, PanicException {
-		Transaction me = Transaction.getLocal();
         ReadSet readSet = ReadSet.getLocal();
         switch(Transaction.getLocal().getStatus()) {
         case COMMITTED:
@@ -37,7 +41,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	WriteSet writeSet = WriteSet.getLocal();
         	if (writeSet.get(this) == null) {
         		if (lock.isLocked()) {
-					ContentionManager.getLocal().resolve(me, creator);
+					ContentionManager.getLocal().resolve(Transaction.getLocal(), creator);
 					Thread.yield();
         		}
         		readSet.add(this);
@@ -68,16 +72,18 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		WriteSet writeSet = WriteSet.getLocal();
     		T scratch = (T) writeSet.get(this);
     		if (scratch == null) {
-    			if (lock.isLocked()) 
-    				throw new AbortedException();
-				//try {
-					//scratch = (T) internalClass.getDeclaredConstructor().newInstance(version);
-					scratch = (T) new SNode<>(internalInit);
+    			if (lock.isLocked()) {
+					ContentionManager.getLocal().resolve(Transaction.getLocal(), creator);
+					Thread.yield();
+				}
+				try {
+					LOGGER.info("NEW INSTANCE!!!!!!!");
+					scratch = (T) internalClass.newInstance();
 					version.copyTo(scratch);
-					WriteSet.put(this, scratch);
-				/*} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+					writeSet.put(this, scratch);
+				} catch (InstantiationException | IllegalAccessException e) {
 					e.printStackTrace();
-				}*/
+				}
 			}
     		return scratch;
     	case ABORTED:

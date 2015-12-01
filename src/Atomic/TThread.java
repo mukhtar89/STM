@@ -1,4 +1,11 @@
-import org.omg.CORBA.TIMEOUT;
+package STM.Atomic;
+
+import STM.ContentionManagers.BackOffManager;
+import STM.ContentionManagers.ContentionManager;
+import STM.Exceptions.AbortedException;
+import STM.Exceptions.PanicException;
+import STM.Transaction;
+import STM.VersionClock;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -6,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 
-public class TThread<T> extends java.lang.Thread {
+public class TThread  {
 
-	private final long TIMEOUT = 10L;
+	private final int TIMEOUT = 10;
 	private static final Logger LOGGER = Logger.getLogger(TThread.class.getName());
 
 	public <T> T doIt(Callable<T> xaction) throws Exception {
@@ -26,7 +33,7 @@ public class TThread<T> extends java.lang.Thread {
 				throw new PanicException(e);
 			}
 			if (onValidate.call()) {
-				LOGGER.info("OnValidate funcation ");
+				LOGGER.info("OnValidate function ");
 				if (me.commit()) {
 					onCommit.run();
 					LOGGER.info("COMMITTED successful" );
@@ -42,7 +49,7 @@ public class TThread<T> extends java.lang.Thread {
 	private Runnable onAbort = new Runnable() {
 		@Override
 		public void run() {
-			LOGGER.info("Transaction Aborting from LockObject");
+			LOGGER.info("Transaction Aborting from Atomic.LockObject");
 			WriteSet.getLocal().unlock();
 			WriteSet.getLocal().clear();
 			ReadSet.getLocal().clear();
@@ -80,12 +87,12 @@ public class TThread<T> extends java.lang.Thread {
 			WriteSet writeSet = WriteSet.getLocal();
 			ReadSet readSet = ReadSet.getLocal();
 			if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
-				LOGGER.info("WriteSet Lock TIMEOUT");
+				LOGGER.info("Atomic.WriteSet Lock TIMEOUT");
 				return false;
 			}
 			for (LockObject<?> x : readSet.getList()) {
 				if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread()) {
-					LOGGER.info("Object locked and held, ContentionManager called");
+					LOGGER.info("Object locked and held, ContentionManagers.ContentionManager called");
 					ContentionManager.getLocal().resolve(Transaction.getLocal(), x.creator);
 				}
 				if (x.stamp > VersionClock.getReadStamp()) {

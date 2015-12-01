@@ -1,3 +1,7 @@
+package STM.Atomic;
+
+import STM.Exceptions.AtomicArrayException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +27,7 @@ public class AtomicArray<T> {
     }
 
     /**
-     * Returns length of the AtomicArray
+     * Returns length of the Atomic.AtomicArray
      *
      * @return int
      */
@@ -70,7 +74,7 @@ public class AtomicArray<T> {
     }
 
     /**
-     * Returns the AtomicArray as Static List
+     * Returns the Atomic.AtomicArray as Static List
      *
      * @return List<Entry<T>>
      */

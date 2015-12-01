@@ -1,4 +1,9 @@
+package STM.ContentionManagers;
+
+import STM.Transaction;
+
 import java.util.Random;
+import java.util.logging.Logger;
 
 public class BackOffManager extends ContentionManager {
 
@@ -7,8 +12,10 @@ public class BackOffManager extends ContentionManager {
 	Random random = new Random();
 	Transaction previous = null;
 	int delay = MIN_DELAY;
+	private static Logger LOGGER = Logger.getLogger(BackOffManager.class.getName());
 	
 	public void resolve(Transaction me, Transaction other) {
+		//LOGGER.info("IN CONTENTION MANAGER............... YAAAAYY...!!!!!!!!!!");
 		if (other != previous) {
 			previous = other;
 			delay = MIN_DELAY;
@@ -23,6 +30,7 @@ public class BackOffManager extends ContentionManager {
 			}
 		}
 		else {
+			//LOGGER.info("IN CONTENTION MANAGER............... Sorry, ABORTING");
 			other.abort();
 			delay = MIN_DELAY;
 		}

@@ -1,4 +1,4 @@
-import java.util.concurrent.atomic.AtomicReference;
+package STM.DataStructure;
 
 /**
  * Created by Mukhtar on 11/3/2015.

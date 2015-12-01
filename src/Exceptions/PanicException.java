@@ -1,3 +1,4 @@
+package STM.Exceptions;
 
 public class PanicException extends Exception {
 

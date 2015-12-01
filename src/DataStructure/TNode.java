@@ -1,4 +1,8 @@
-import java.util.concurrent.atomic.AtomicReference;
+package STM.DataStructure;
+
+import STM.Atomic.AtomicObject;
+import STM.Atomic.LockObject;
+import STM.Exceptions.AbortedException;
 
 /**
  * Created by Mukhtar on 11/3/2015.
@@ -36,6 +40,8 @@ public class TNode<T> implements Node<T> {
         Node<T> retNode = null;
         try {
             retNode = atomic.openRead().getNext();
+            if (!atomic.validate())
+                throw new AbortedException();
         } catch (Exception e) {
             e.printStackTrace();
         }

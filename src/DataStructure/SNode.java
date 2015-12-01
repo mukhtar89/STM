@@ -1,3 +1,7 @@
+package STM.DataStructure;
+
+import STM.Atomic.Copyable;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -7,6 +11,8 @@ public class SNode<T> implements Node<T>, Copyable<SNode<T>> {
 
     AtomicReference<Node<T>> next;
     T item;
+
+    public SNode(){};
 
     public SNode(T myItem) {
         item = myItem;

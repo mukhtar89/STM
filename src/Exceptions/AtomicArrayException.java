@@ -1,3 +1,5 @@
+package STM.Exceptions;
+
 /**
  * Created by Mukhtar on 11/3/2015.
  */

@@ -1,7 +1,7 @@
+package STM.Atomic;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class ReadSet {
@@ -23,7 +23,7 @@ public class ReadSet {
 	}
 	
 	public void add(LockObject<?> lockObj) {
-		LOGGER.info("Adding object to ReadSet");
+		LOGGER.info("Adding object to Atomic.ReadSet");
 		if (!dataSet.contains(lockObj))
 			dataSet.add(lockObj);
 	}

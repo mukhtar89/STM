@@ -1,15 +1,18 @@
+package STM.DataStructure;
+
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 public class TLinkedList<T> {
 	
 	private Node<T> head;
 	private Node<T> tail;
 	public HashMap<T, Node<T>> nodeMap;
+	private static Logger LOGGER = Logger.getLogger(TLinkedList.class.getName());
 	
 	public TLinkedList () {
-		head = new TNode<>(null);
-		tail = new TNode<>(null);
+		head = null;
+		tail = null;
 		nodeMap = new HashMap<>();
 	}
 	
@@ -35,11 +38,21 @@ public class TLinkedList<T> {
 			return true;
 		}
 		while (runner.getNext() != null) {
-			if (runner.getNext() == value) {
+			LOGGER.severe("inside RUNNER*****************************************************: " + runner.getItem());
+			if (runner.getNext().getItem() == value) {
 				runner.getNext().setNext(runner.getNext().getNext());
 				return true;
 			}
+			runner = runner.getNext();
 		}
 		return false;
+	}
+
+	public void printAll() {
+		Node<T> runner = head;
+		while (runner.getNext() != null) {
+			System.out.print(runner.getItem() + ",");
+			runner = runner.getNext();
+		}
 	}
 }

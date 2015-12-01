@@ -1,8 +1,11 @@
+package STM.Atomic;
+
+import STM.ContentionManagers.ContentionManager;
+import STM.Transaction;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
 public class WriteSet {
@@ -23,7 +26,7 @@ public class WriteSet {
 		return map.get().get(x);
 	}
 	
-	public static void put(LockObject<?> x, Object y) {
+	public void put(LockObject<?> x, Object y) {
 		map.get().put(x, y);
 	}
 	
