@@ -1,47 +1,100 @@
+import org.omg.CORBA.TIMEOUT;
+
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 
 public class TThread<T> extends java.lang.Thread {
 
-	private Runnable onAbort;
-	private Runnable onCommit;
-	private Callable<Boolean> onValidate;
-	private TNode<T> node;
+	private final long TIMEOUT = 10L;
 	private static final Logger LOGGER = Logger.getLogger(TThread.class.getName());
-
-	public TThread(TNode<T> node) {
-		this.node = node;
-		onValidate = node.atomic.onValidate();
-		onAbort = node.atomic.onAbort();
-		onCommit = node.atomic.onCommit();
-	}
 
 	public <T> T doIt(Callable<T> xaction) throws Exception {
 		T result = null;
-		LOGGER.info("Do it function called with obj: " + node.getItem());
+		LOGGER.info("Do it function called");
 		while (true) {
 			Transaction me = new Transaction();
 			Transaction.setLocal(me);
 			ContentionManager.setLocal(new BackOffManager());
 			try {
 				result = xaction.call();
-				LOGGER.info("XACTION call is made by :" + node.getItem());
+				LOGGER.info("XACTION call is made");
 			} catch (AbortedException e) {
 			} catch (Exception e) {
 				throw new PanicException(e);
 			}
 			if (onValidate.call()) {
-				LOGGER.info("OnValidate funcation true: " + node.getItem());
+				LOGGER.info("OnValidate funcation ");
 				if (me.commit()) {
 					onCommit.run();
-					LOGGER.info("COMMITTED successful: " + node.getItem());
+					LOGGER.info("COMMITTED successful" );
 					return result;
 				}
 			}
 			me.abort();
 			onAbort.run();
-			LOGGER.info("Transaction ABORTED: " + node.getItem());
+			LOGGER.info("Transaction ABORTED");
 		}
 	}
+
+	private Runnable onAbort = new Runnable() {
+		@Override
+		public void run() {
+			LOGGER.info("Transaction Aborting from LockObject");
+			WriteSet.getLocal().unlock();
+			WriteSet.getLocal().clear();
+			ReadSet.getLocal().clear();
+		}
+	};
+
+	private Runnable onCommit = new Runnable() {
+		@Override
+		public void run() {
+			try {
+				WriteSet writeSet = WriteSet.getLocal();
+				ReadSet readSet = ReadSet.getLocal();
+				VersionClock.setWriteStamp();
+				long writeVersion = VersionClock.getWriteStamp();
+				for (Map.Entry<LockObject<?>,Object> entry : writeSet.getList()) {
+					LockObject<?> key = entry.getKey();
+					Copyable<?> destination = key.openRead();
+					Copyable<Copyable<?>> source = (Copyable<Copyable<?>>) entry.getValue();
+					source.copyTo(destination);
+					LOGGER.info("WRTING OBJECT VALUE");
+					key.stamp = writeVersion;
+				}
+				writeSet.unlock();
+				writeSet.clear();
+				readSet.clear();
+			} catch (AbortedException | PanicException e) {
+				e.printStackTrace();
+			}
+		}
+	};
+
+	private Callable<Boolean> onValidate = new Callable<Boolean>() {
+		@Override
+		public Boolean call() throws Exception {
+			WriteSet writeSet = WriteSet.getLocal();
+			ReadSet readSet = ReadSet.getLocal();
+			if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
+				LOGGER.info("WriteSet Lock TIMEOUT");
+				return false;
+			}
+			for (LockObject<?> x : readSet.getList()) {
+				if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread()) {
+					LOGGER.info("Object locked and held, ContentionManager called");
+					ContentionManager.getLocal().resolve(Transaction.getLocal(), x.creator);
+				}
+				if (x.stamp > VersionClock.getReadStamp()) {
+					LOGGER.info("Stamp > Version CLOCK");
+					return false;
+				}
+			}
+			return true;
+		}
+	};
+
 }

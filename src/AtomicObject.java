@@ -15,7 +15,4 @@ public abstract class AtomicObject<T extends Copyable<T>> {
     public abstract T openRead() throws Exception;
     public abstract T openWrite() throws Exception;
     public abstract boolean validate();
-    public abstract Callable<Boolean> onValidate();
-    public abstract Runnable onCommit();
-    public abstract Runnable onAbort();
 }

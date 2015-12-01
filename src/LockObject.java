@@ -10,8 +10,8 @@ import java.util.logging.Logger;
  */
 public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 	
-	private ReentrantLock lock;
-	private volatile long stamp;
+	protected ReentrantLock lock;
+	protected volatile long stamp;
 	private volatile T version;
 	protected Transaction creator;
 	private static Logger LOGGER = Logger.getLogger(LockObject.class.getName());
@@ -102,81 +102,16 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		return false;
     	}
     }
-    
-    public Callable<Boolean> onValidate() {
 
-		final long TIMEOUT = 0;
-		return new Callable<Boolean>() {
-			@Override
-			public Boolean call() throws Exception {
-				WriteSet writeSet = WriteSet.getLocal();
-				ReadSet readSet = ReadSet.getLocal();
-				if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
-					LOGGER.info("WriteSet Lock TIMEOUT");
-					return false;
-				}
-				for (LockObject<?> x : readSet.getList()) {
-					if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread()) {
-						LOGGER.info("Object locked and held, ContentionManager called");
-						ContentionManager.getLocal().resolve(Transaction.getLocal(), creator);
-					}
-					if (stamp > VersionClock.getReadStamp()) {
-						LOGGER.info("Stamp > Version CLOCK");
-						return false;
-					}
-				}
-				return true;
-			}
-		};
-    }
-
-	@Override
-	public Runnable onCommit() {
-		return new Runnable() {
-			@Override
-			public void run() {
-				try {
-					WriteSet writeSet = WriteSet.getLocal();
-					ReadSet readSet = ReadSet.getLocal();
-					VersionClock.setWriteStamp();
-					long writeVersion = VersionClock.getWriteStamp();
-					for (Map.Entry<LockObject<?>,Object> entry : writeSet.getList()) {
-						LockObject<?> key = entry.getKey();
-						Copyable<?> destination = key.openRead();
-						Copyable<Copyable<?>> source = (Copyable<Copyable<?>>) entry.getValue();
-						source.copyTo(destination);
-						LOGGER.info("WRTING OBJECT VALUE");
-						key.stamp = writeVersion;
-					}
-					writeSet.unlock();
-					writeSet.clear();
-					readSet.clear();
-				} catch (AbortedException | PanicException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-	}
-
-	@Override
-	public Runnable onAbort() {
-		return new Runnable() {
-			@Override
-			public void run() {
-				LOGGER.info("Transaction Aborting from LockObject");
-				WriteSet.getLocal().unlock();
-				WriteSet.getLocal().clear();
-				ReadSet.getLocal().clear();
-			}
-		};
-	}
     
     public void lock() {
-    	lock.lock();
+    	if (!lock.isLocked())
+			lock.lock();
     }
     
 	public void unlock(){
-		lock.unlock();
+		if (lock.isLocked() && creator == Transaction.getLocal())
+			lock.unlock();
 	}
 	
 	public boolean tryLock(long timeout, TimeUnit timeUnit) {

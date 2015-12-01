@@ -12,38 +12,38 @@ public class Main {
 	private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 	private static LoggerFwk logfwk;
 
-	private static Integer NUM_THREADS = 5;
+	private static Integer NUM_THREADS = 10;
 	
 	public static class Produce<T> implements Callable<T> {
 		
-		private Node<T> node;
+		private T value;
 		
-		public Produce(Node<T> node) {
-			LOGGER.info("Adding Node with value : " + node.getItem());
-			this.node = node;
+		public Produce(T value) {
+			LOGGER.info("Adding Node with value : " + value);
+			this.value = value;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.add((Node<Integer>) node);
-			LOGGER.info("Calling Produce Callable: " + node.getItem());
+			linkedList.add((Integer) value);
+			LOGGER.info("Calling Produce Callable: " + value);
 			return null;
 		}
 	}
 	
 	public static class Consume<T> implements Callable<T> {
 
-		private Node<T> node;
+		private T value;
 
-		public Consume(Node<T> node) {
-			LOGGER.info("Deleting Node with value : " + node.getItem());
-			this.node = node;
+		public Consume(T value) {
+			LOGGER.info("Deleting Node with value : " + value);
+			this.value = value;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.remove((Node<Integer>) node);
-			LOGGER.info("Calling Consume Callable: " + node.getItem());
+			linkedList.remove((Integer) value);
+			LOGGER.info("Calling Consume Callable: " + value);
 			return null;
 		}
 	}
@@ -59,16 +59,16 @@ public class Main {
         for (int i=0; i<NUM_THREADS; i++) {
         	int inserted = random.nextInt(i+1);
 			TNode<Integer> temp = new TNode<>(inserted);
-        	paction = new Produce<>(temp);
-        	pro[i] = new TThread(temp);
+        	paction = new Produce<>(inserted);
+        	pro[i] = new TThread();
         	pro[i].doIt(paction);
         	produced.add(inserted);
         	if (produced.size() > 2) {
         		produced.toArray(producedArray);
 				int toRemove = producedArray[random.nextInt(i)];
 				temp = (TNode<Integer>) linkedList.nodeMap.get(toRemove);
-        		caction = new Consume<>(temp);
-        		con[i] = new TThread(temp);
+        		caction = new Consume<>(toRemove);
+        		con[i] = new TThread();
             	con[i].doIt(caction);
         	}
         	pro[i].join();
