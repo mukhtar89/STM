@@ -27,15 +27,11 @@ public class WriteSet {
 		map.get().put(x, y);
 	}
 	
-	public boolean tryLock(long timeout, TimeUnit timeUnit) throws AbortedException {
-		Stack<LockObject<?>> stack = new Stack<LockObject<?>>();
+	public boolean tryLock(long timeout, TimeUnit timeUnit) {
 		for (LockObject<?> x : map.get().keySet()) {
-			if (!x.tryLock(timeout, timeUnit)) {
-				for (LockObject<?> y : stack) {
-					y.unlock();
-				}
-				//throw new AbortedException();
-				return false;
+			while (!x.tryLock(timeout, timeUnit)) {
+				ContentionManager.getLocal().resolve(Transaction.getLocal(), x.creator);
+				Thread.yield();
 			}
 		}
 		return true;
@@ -55,7 +51,7 @@ public class WriteSet {
 		local.set(writeSet);
 	}
 	
-	public static Set<Map.Entry<LockObject<?>, Object>>  getList() {
+	public Set<Map.Entry<LockObject<?>, Object>>  getList() {
 		return dataSet.entrySet();
 	}
 

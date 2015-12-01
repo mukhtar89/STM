@@ -3,44 +3,43 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TLinkedList<T> {
 	
-	private AtomicReference<Node<T>> head;
-	private AtomicReference<Node<T>> tail;
+	private Node<T> head;
+	private Node<T> tail;
 	public HashMap<T, Node<T>> nodeMap;
 	
 	public TLinkedList () {
-		head = null;
-		tail = null;
+		head = new TNode<>(null);
+		tail = new TNode<>(null);
 		nodeMap = new HashMap<>();
 	}
 	
-	public void add(Node<T> value) {
-		nodeMap.put(value.getItem(), value);
+	public void add(T value) {
+		Node<T> temp = new TNode<>(value);
+		nodeMap.put(value, temp);
 		if (head == null) {
-			head = new AtomicReference<>(value);
+			head
 			tail = head;
 		}
 		else {
-			AtomicReference<Node<T>> temp = new AtomicReference<>(value);
-			tail.get().setNext(temp);
+			tail.setNext(temp);
 			tail = temp;
 		}
 	}
 	
-	public boolean remove(Node<T> value) {
+	public boolean remove(T value) {
 		if (head == tail)
 			return false;
-		AtomicReference<Node<T>> runner = head;
-		if (head.get().getItem() == value.getItem()) {
-			head.get().setNext(head.get().getNext());
+		Node<T> runner = head;
+		if (head.getItem() == value) {
+			head.setNext(head.getNext());
 			return true;
 		}
-		while (runner.get().getNext().get() != null) {
-			if (runner.get().getNext().get() == value.getItem()) {
-				runner.get().getNext().set(runner.get().getNext().get().getNext().get());
+		while (runner.getNext() != null) {
+			if (runner.getNext() == value) {
+				runner.getNext().setNext(runner.getNext().getNext());
 				return true;
 			}
 		}
 		return false;
 	}
-
 }

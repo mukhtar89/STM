@@ -24,13 +24,13 @@ public class SNode<T> implements Node<T>, Copyable<SNode<T>> {
     }
 
     @Override
-    public AtomicReference<Node<T>> getNext() {
-        return next;
+    public Node<T> getNext() {
+        return next.get();
     }
 
     @Override
-    public void setNext(AtomicReference<Node<T>> value) {
-        next = value;
+    public void setNext(Node<T> value) {
+        next.set(value);
     }
 
     @Override

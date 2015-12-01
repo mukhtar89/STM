@@ -16,34 +16,34 @@ public class Main {
 	
 	public static class Produce<T> implements Callable<T> {
 		
-		private Node<T> node;
+		private T value;
 		
-		public Produce(Node<T> node) {
-			LOGGER.info("Adding Node with value : " + node.getItem());
-			this.node = node;
+		public Produce(T value) {
+			LOGGER.info("Adding Node with value : " + value);
+			this.value = value;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.add((Node<Integer>) node);
-			LOGGER.info("Calling Produce Callable: " + node.getItem());
+			linkedList.add(value);
+			LOGGER.info("Calling Produce Callable: " + value);
 			return null;
 		}
 	}
 	
 	public static class Consume<T> implements Callable<T> {
 
-		private Node<T> node;
+		private T value;
 
-		public Consume(Node<T> node) {
-			LOGGER.info("Deleting Node with value : " + node.getItem());
-			this.node = node;
+		public Consume(T value) {
+			LOGGER.info("Deleting Node with value : " + value);
+			this.value = value;
 		}
 
 		@Override
 		public T call() throws Exception {
-			linkedList.remove((Node<Integer>) node);
-			LOGGER.info("Calling Consume Callable: " + node.getItem());
+			linkedList.remove(value);
+			LOGGER.info("Calling Consume Callable: " + value);
 			return null;
 		}
 	}
@@ -55,12 +55,12 @@ public class Main {
 		logfwk = new LoggerFwk();
 		LOGGER = logfwk.logHandler(LOGGER);
         Random random = new Random();
-        Callable<Integer> paction = null, caction = null;
+        Callable<Integer> paction, caction;
         for (int i=0; i<NUM_THREADS; i++) {
         	int inserted = random.nextInt(i+1);
 			TNode<Integer> temp = new TNode<>(inserted);
         	paction = new Produce<>(temp);
-        	pro[i] = new TThread(temp.atomic);
+        	pro[i] = new TThread(temp);
         	pro[i].doIt(paction);
         	produced.add(inserted);
         	if (produced.size() > 2) {
@@ -68,7 +68,7 @@ public class Main {
 				int toRemove = producedArray[random.nextInt(i)];
 				temp = (TNode<Integer>) linkedList.nodeMap.get(toRemove);
         		caction = new Consume<Integer>(temp);
-        		con[i] = new TThread(temp.atomic);
+        		con[i] = new TThread(temp);
             	con[i].doIt(caction);
         	}
         	pro[i].join();

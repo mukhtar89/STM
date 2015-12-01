@@ -32,22 +32,24 @@ public class TNode<T> implements Node<T> {
     }
 
     @Override
-    public AtomicReference<Node<T>> getNext() {
-        AtomicReference<Node<T>> next = null;
+    public Node<T> getNext() {
+        Node<T> retNode = null;
         try {
-            next =  atomic.openRead().getNext();
+            retNode = atomic.openRead().getNext();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return next;
+        return retNode;
     }
 
+
     @Override
-    public void setNext(AtomicReference<Node<T>> value) {
+    public void setNext(Node<T> value) {
         try {
             atomic.openWrite().setNext(value);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }

@@ -7,42 +7,41 @@ public class TThread<T> extends java.lang.Thread {
 	private Runnable onAbort;
 	private Runnable onCommit;
 	private Callable<Boolean> onValidate;
-	private AtomicObject<Node<T>> object;
+	private TNode<T> node;
 	private static final Logger LOGGER = Logger.getLogger(TThread.class.getName());
 
-	public TThread(AtomicObject<Node<T>> object) {
-		this.object = object;
-		onAbort = object.onAbort();
-		onCommit = object.onCommit();
+	public TThread(TNode<T> node) {
+		this.node = node;
+		onValidate = node.atomic.onValidate();
+		onAbort = node.atomic.onAbort();
+		onCommit = node.atomic.onCommit();
 	}
 
 	public <T> T doIt(Callable<T> xaction) throws Exception {
 		T result = null;
-		LOGGER.info("Do it function called with obj: " + object.internalInit.getItem());
+		LOGGER.info("Do it function called with obj: " + node.getItem());
 		while (true) {
 			Transaction me = new Transaction();
 			Transaction.setLocal(me);
-			onValidate = object.onValidate(me);
-			ContentionManager contentionManager = new BackOffManager();
-			ContentionManager.setLocal(contentionManager);
+			ContentionManager.setLocal(new BackOffManager());
 			try {
 				result = xaction.call();
-				LOGGER.info("XACTION call is made by :" + object.internalInit.getItem());
+				LOGGER.info("XACTION call is made by :" + node.getItem());
 			} catch (AbortedException e) {
 			} catch (Exception e) {
 				throw new PanicException(e);
 			}
 			if (onValidate.call()) {
-				LOGGER.info("OnValidate funcation true: " + object.internalInit.getItem());
+				LOGGER.info("OnValidate funcation true: " + node.getItem());
 				if (me.commit()) {
 					onCommit.run();
-					LOGGER.info("COMMITTED successful: " + object.internalInit.getItem());
+					LOGGER.info("COMMITTED successful: " + node.getItem());
 					return result;
 				}
 			}
 			me.abort();
 			onAbort.run();
-			LOGGER.info("Transaction ABORTED: " + object.internalInit.getItem());
+			LOGGER.info("Transaction ABORTED: " + node.getItem());
 		}
 	}
 }

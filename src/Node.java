@@ -6,6 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public interface Node<T>  {
     T getItem();
     void setItem(T value);
-    AtomicReference<Node<T>> getNext();
-    void setNext(AtomicReference<Node<T>> value);
+    Node<T> getNext();
+    void setNext(Node<T> value);
 }

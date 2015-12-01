@@ -10,27 +10,23 @@ import java.util.logging.Logger;
  */
 public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 	
-	ReentrantLock lock;
-	volatile long stamp;
-	T version;
+	private ReentrantLock lock;
+	private volatile long stamp;
+	private volatile T version;
+	protected Transaction creator;
 	private static Logger LOGGER = Logger.getLogger(LockObject.class.getName());
-	private static LoggerFwk logfwk;
 
     public LockObject(T init) {
         super(init);
 		version = internalInit;
 		lock = new ReentrantLock();
-		try {
-			logfwk = new LoggerFwk();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		LOGGER = logfwk.logHandler(LOGGER);
+		creator = Transaction.getLocal();
     }
 
     @SuppressWarnings("unchecked")
 	@Override
     public T openRead() throws AbortedException, PanicException {
+		Transaction me = Transaction.getLocal();
         ReadSet readSet = ReadSet.getLocal();
         switch(Transaction.getLocal().getStatus()) {
         case COMMITTED:
@@ -41,7 +37,8 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	WriteSet writeSet = WriteSet.getLocal();
         	if (writeSet.get(this) == null) {
         		if (lock.isLocked()) {
-        			throw new AbortedException();
+					ContentionManager.getLocal().resolve(me, creator);
+					Thread.yield();
         		}
         		readSet.add(this);
 				LOGGER.info("In Open Read ACTIVE with value: " + version.toString());
@@ -106,7 +103,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     	}
     }
     
-    public Callable<Boolean> onValidate(Transaction me) {
+    public Callable<Boolean> onValidate() {
 
 		final long TIMEOUT = 0;
 		return new Callable<Boolean>() {
@@ -115,16 +112,13 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 				WriteSet writeSet = WriteSet.getLocal();
 				ReadSet readSet = ReadSet.getLocal();
 				if (!writeSet.tryLock(TIMEOUT, TimeUnit.MILLISECONDS)) {
-					//return false;
-					//TODO: Call Contention Manager here
-					LOGGER.info("Accessing CONTENTION MANAGER");
-					ContentionManager contentionManager = ContentionManager.getLocal();
-					contentionManager.resolve(me, Transaction.getLocal());
+					LOGGER.info("WriteSet Lock TIMEOUT");
+					return false;
 				}
 				for (LockObject<?> x : readSet.getList()) {
 					if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread()) {
-						LOGGER.info("Object locked and held");
-						return false;
+						LOGGER.info("Object locked and held, ContentionManager called");
+						ContentionManager.getLocal().resolve(Transaction.getLocal(), creator);
 					}
 					if (stamp > VersionClock.getReadStamp()) {
 						LOGGER.info("Stamp > Version CLOCK");
@@ -146,7 +140,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 					ReadSet readSet = ReadSet.getLocal();
 					VersionClock.setWriteStamp();
 					long writeVersion = VersionClock.getWriteStamp();
-					for (Map.Entry<LockObject<?>,Object> entry : WriteSet.getList()) {
+					for (Map.Entry<LockObject<?>,Object> entry : writeSet.getList()) {
 						LockObject<?> key = entry.getKey();
 						Copyable<?> destination = key.openRead();
 						Copyable<Copyable<?>> source = (Copyable<Copyable<?>>) entry.getValue();
@@ -170,7 +164,9 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 			@Override
 			public void run() {
 				LOGGER.info("Transaction Aborting from LockObject");
-				while(!Transaction.getLocal().abort());
+				WriteSet.getLocal().unlock();
+				WriteSet.getLocal().clear();
+				ReadSet.getLocal().clear();
 			}
 		};
 	}

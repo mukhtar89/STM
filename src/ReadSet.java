@@ -1,10 +1,12 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class ReadSet {
 
-	static List<LockObject<?>> dataSet = new ArrayList<LockObject<?>>();
+	static List<LockObject<?>> dataSet = new ArrayList<>();
 	static ThreadLocal<ReadSet> local = new ThreadLocal<ReadSet>() {
 		protected ReadSet initialValue() {
 			return new ReadSet();
@@ -22,9 +24,10 @@ public class ReadSet {
 	
 	public void add(LockObject<?> lockObj) {
 		LOGGER.info("Adding object to ReadSet");
-		local.get().dataSet.add(lockObj);
+		if (!dataSet.contains(lockObj))
+			dataSet.add(lockObj);
 	}
-	
+
 	public List<LockObject<?>> getList() {
 		return dataSet;
 	}

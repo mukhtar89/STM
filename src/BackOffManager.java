@@ -2,8 +2,8 @@ import java.util.Random;
 
 public class BackOffManager extends ContentionManager {
 
-	private static final int MIN_DELAY = 100;
-	private static final int MAX_DELAY = 1000;
+	private static final int MIN_DELAY = 1;
+	private static final int MAX_DELAY = 4 ;
 	Random random = new Random();
 	Transaction previous = null;
 	int delay = MIN_DELAY;
