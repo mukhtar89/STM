@@ -6,29 +6,22 @@ import STM.Exceptions.PanicException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-public class TLLinkedList<T> {
+public class TransactionalLinkedList<T> {
 
     private TLNode<T> head;
     private TLNode<T> tail;
-    //public HashMap<T, TLNode<T>> nodeMap;
     private static Logger LOGGER = Logger.getLogger(TLinkedList.class.getName());
 
-    public TLLinkedList (T dummy_head, T dummy_tail) {
-        head = new TLNode<>(dummy_head); //make the dummy_item value to null
+    public TransactionalLinkedList (T dummy_head, T dummy_tail) {
+        head = new TLNode<>(dummy_head);
         tail = new TLNode<>(dummy_tail);
         head.setNext(tail);
         tail.setPrev(head);
-        //nodeMap = new HashMap<>();
     }
 
     public void add(T value) {
-        //nodeMap.put(value, temp);
         TLNode<T> temp = new TLNode<>(value);
-        LNode<T> last_node = head;
-
-        while(last_node.getNext() != tail) {
-            last_node = (last_node.getNext());
-        }
+        LNode<T> last_node = tail.getPrev();
 
         //Now insert/add at this location
         last_node.setNext(temp);
@@ -54,7 +47,7 @@ public class TLLinkedList<T> {
             after_last_node = last_node.getNext();
             before_last_node.setNext(after_last_node);
             after_last_node.setPrev(before_last_node);
-            last_node = null;
+            //last_node = null;
         }
         return status;
     }

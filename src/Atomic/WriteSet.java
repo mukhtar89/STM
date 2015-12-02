@@ -29,7 +29,6 @@ public class WriteSet {
 	public void put(LockObject<?> x, Object y) {
 		map.get().put(x, y);
 	}
-	
 	public boolean tryLock(long timeout, TimeUnit timeUnit) {
 		for (LockObject<?> x : map.get().keySet()) {
 			while (!x.tryLock(timeout, timeUnit)) {
@@ -39,7 +38,6 @@ public class WriteSet {
 		}
 		return true;
 	}
-	
 	public void unlock() {
 		for (LockObject<?> x : map.get().keySet()) {
 			x.unlock();

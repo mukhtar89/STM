@@ -8,9 +8,7 @@ import STM.Exceptions.AbortedException;
  * Created by Mukhtar on 11/3/2015.
  */
 public class TLNode<T> implements LNode<T> {
-
     AtomicObject<SLNode<T>> atomic;
-
     public TLNode() {}
     public TLNode(T myItem) {
         atomic = new LockObject<>(new SLNode<>(myItem));
@@ -26,7 +24,6 @@ public class TLNode<T> implements LNode<T> {
         }
         return item;
     }
-
     @Override
     public void setItem(T value) {
         try {
@@ -35,7 +32,6 @@ public class TLNode<T> implements LNode<T> {
             e.printStackTrace();
         }
     }
-
     @Override
     public LNode<T> getNext() {
         LNode<T> retNode = null;
@@ -48,7 +44,6 @@ public class TLNode<T> implements LNode<T> {
         }
         return retNode;
     }
-
     @Override
     public LNode<T> getPrev() {
         LNode<T> retNode = null;
@@ -61,8 +56,6 @@ public class TLNode<T> implements LNode<T> {
         }
         return retNode;
     }
-
-
     @Override
     public void setNext(LNode<T> value) {
         try {
@@ -71,7 +64,7 @@ public class TLNode<T> implements LNode<T> {
             e.printStackTrace();
         }
     }
-
+    @Override
     public void setPrev(LNode<T> value) {
         try {
             atomic.openWrite().setPrev(value);

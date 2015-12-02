@@ -14,7 +14,6 @@ import java.util.logging.Logger;
  * Created by Mukhtar on 11/3/2015.
  */
 public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
-	
 	public ReentrantLock lock;
 	public volatile long stamp;
 	private volatile T version;
@@ -27,7 +26,6 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 		lock = new ReentrantLock();
 		creator = Transaction.getLocal();
     }
-
     @SuppressWarnings("unchecked")
 	@Override
     public T openRead() throws AbortedException, PanicException {
@@ -59,7 +57,6 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	throw new PanicException("Unexpected Transaction state!");	
         }
     }
-
     @SuppressWarnings("unchecked")
 	@Override
     public T openWrite() throws AbortedException, PanicException {
@@ -93,7 +90,6 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	throw new PanicException("Unexpected Transaction state!");	
     	}
     }
-
     @Override
     public boolean validate() {
     	Transaction.Status status = Transaction.getLocal().getStatus();
@@ -108,13 +104,10 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		return false;
     	}
     }
-
-    
     public void lock() {
     	if (!lock.isLocked())
 			lock.lock();
     }
-    
 	public void unlock(){
 		if (lock.isLocked() && creator == Transaction.getLocal())
 			lock.unlock();
