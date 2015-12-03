@@ -69,7 +69,7 @@ public class Main_DM {
 		T1.doIt(p1);
 
 		T2 = new TThread();
-		T2.doIt(c1);
+		T2.doIt(p1);
 
 		p1.setValue(2);
 		T3 = new TThread();

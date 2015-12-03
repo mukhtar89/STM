@@ -28,6 +28,7 @@ public class TransactionalLinkedList<T> {
         temp.setNext(tail);
         temp.setPrev(last_node);
         tail.setPrev(temp);
+        LOGGER.info("attempting add request with val:=  " + value + "!!");
     }
 
     public Boolean remove(T value) {
@@ -47,8 +48,10 @@ public class TransactionalLinkedList<T> {
             after_last_node = last_node.getNext();
             before_last_node.setNext(after_last_node);
             after_last_node.setPrev(before_last_node);
+            LOGGER.info("Removal attempt successful!");
             //last_node = null;
         }
+        else { LOGGER.info("Removal attempt failed.. :("); }
         return status;
     }
 
