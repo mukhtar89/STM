@@ -42,6 +42,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         		if (lock.isLocked()) {
 					ContentionManager.getLocal().resolve(Transaction.getLocal(), locker);
 					Thread.yield();
+					//Transaction.getLocal().abort();
         		}
         		readSet.add(this);
 				LOGGER.info("In Open Read ACTIVE with value: " + version.toString());
@@ -74,6 +75,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     			if (lock.isLocked()) {
 					ContentionManager.getLocal().resolve(Transaction.getLocal(), locker);
 					Thread.yield();
+					//Transaction.getLocal().abort();
 				}
 				try {
 					LOGGER.info("NEW INSTANCE!!!!!!!");

@@ -9,7 +9,6 @@ public class PoliteManager extends ContentionManager {
 
     private static final int MIN_DELAY = 1;
     private static final int MAX_DELAY = 400;
-    Random random = new Random();
     Transaction previous = null;
     private int delay = MIN_DELAY;
     private int iter = 1;

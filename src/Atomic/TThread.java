@@ -24,7 +24,7 @@ public class TThread extends Thread {
 		while (true) {
 			Transaction me = new Transaction();
 			Transaction.setLocal(me);
-			ContentionManager.setLocal(new KarmaManager());
+			ContentionManager.setLocal(new PoliteManager());
 			try {
 				result = xaction.call();
 				LOGGER.info("XACTION call is made");
@@ -94,8 +94,9 @@ public class TThread extends Thread {
 			for (LockObject<?> x : readSet.getList()) {
 				if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread()) {
 					LOGGER.info("Object locked and held, ContentionManagers.ContentionManager called");
-					ContentionManager.getLocal().resolve(Transaction.getLocal(), x.locker);
-					Thread.yield();
+					/*ContentionManager.getLocal().resolve(Transaction.getLocal(), x.locker);
+					Thread.yield();*/
+					return false;
 				}
 				if (x.stamp > VersionClock.getReadStamp()) {
 					LOGGER.info("Stamp > Version CLOCK");

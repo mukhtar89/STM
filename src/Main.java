@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /* STM basic test */
@@ -59,10 +60,11 @@ public class Main {
         	int inserted = random.nextInt(i+1);
 			executor.execute(new WorkerThread(new Produce<>(inserted)));
         	if (i > 5) {
-				executor.execute(new WorkerThread(new Consume<>(random.nextInt(i-5))));
+				executor.execute(new WorkerThread(new Consume<>(i-3)));
         	}
         }
 		executor.shutdown();
+		TimeUnit.SECONDS.sleep(3);
 		linkedList.printAll();
     }
 
