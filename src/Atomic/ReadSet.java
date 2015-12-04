@@ -17,17 +17,21 @@ public class ReadSet {
 	public static ReadSet getLocal() {
 		return local.get();
 	}
+	
 	public static void setLocal(ReadSet readSet) {
 		local.set(readSet);
 	}
+	
 	public void add(LockObject<?> lockObj) {
 		LOGGER.info("Adding object to Atomic.ReadSet");
 		if (!dataSet.contains(lockObj))
 			dataSet.add(lockObj);
 	}
+
 	public List<LockObject<?>> getList() {
 		return dataSet;
 	}
+
 	public void clear() {
 		dataSet.clear();
 	}

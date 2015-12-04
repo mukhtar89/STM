@@ -22,7 +22,7 @@ public class BackOffManager extends ContentionManager {
 		}
 		if (delay < MAX_DELAY) {
 			try {
-				Thread.sleep(random.nextInt(delay));
+				Thread.sleep(delay);
 				delay *= 2;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block

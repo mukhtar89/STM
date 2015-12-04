@@ -14,18 +14,19 @@ import java.util.logging.Logger;
  * Created by Mukhtar on 11/3/2015.
  */
 public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
-	public ReentrantLock lock;
-	public volatile long stamp;
+	
+	protected ReentrantLock lock;
+	protected volatile long stamp;
 	private volatile T version;
-	public Transaction creator;
+	protected Transaction locker;
 	private static Logger LOGGER = Logger.getLogger(LockObject.class.getName());
 
     public LockObject(T init) {
         super(init);
 		version = internalInit;
 		lock = new ReentrantLock();
-		creator = Transaction.getLocal();
     }
+
     @SuppressWarnings("unchecked")
 	@Override
     public T openRead() throws AbortedException, PanicException {
@@ -39,7 +40,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	WriteSet writeSet = WriteSet.getLocal();
         	if (writeSet.get(this) == null) {
         		if (lock.isLocked()) {
-					ContentionManager.getLocal().resolve(Transaction.getLocal(), creator);
+					ContentionManager.getLocal().resolve(Transaction.getLocal(), locker);
 					Thread.yield();
         		}
         		readSet.add(this);
@@ -57,6 +58,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	throw new PanicException("Unexpected Transaction state!");	
         }
     }
+
     @SuppressWarnings("unchecked")
 	@Override
     public T openWrite() throws AbortedException, PanicException {
@@ -70,7 +72,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		T scratch = (T) writeSet.get(this);
     		if (scratch == null) {
     			if (lock.isLocked()) {
-					ContentionManager.getLocal().resolve(Transaction.getLocal(), creator);
+					ContentionManager.getLocal().resolve(Transaction.getLocal(), locker);
 					Thread.yield();
 				}
 				try {
@@ -90,6 +92,7 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
         	throw new PanicException("Unexpected Transaction state!");	
     	}
     }
+
     @Override
     public boolean validate() {
     	Transaction.Status status = Transaction.getLocal().getStatus();
@@ -104,12 +107,15 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
     		return false;
     	}
     }
+
+    
     public void lock() {
     	if (!lock.isLocked())
 			lock.lock();
     }
+    
 	public void unlock(){
-		if (lock.isLocked() && creator == Transaction.getLocal())
+		if (lock.isLocked() && locker == Transaction.getLocal())
 			lock.unlock();
 	}
 	
@@ -118,6 +124,8 @@ public class LockObject<T extends Copyable<T>> extends AtomicObject<T> {
 		boolean retValue = false;
 		try {
 			retValue = lock.tryLock(timeout, timeUnit);
+			if (retValue)
+				locker = Transaction.getLocal();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

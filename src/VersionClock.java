@@ -26,4 +26,8 @@ public class VersionClock {
 	public static long getWriteStamp() {
 		return local.get();
 	}
+
+	public static long getGlobalStamp() {
+		return global.get();
+	}
 }

@@ -20,6 +20,8 @@ public class TNode<T> implements Node<T> {
         T item = null;
         try {
             item = atomic.openRead().getItem();
+            if (!atomic.validate())
+                throw new AbortedException();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,22 +59,5 @@ public class TNode<T> implements Node<T> {
             e.printStackTrace();
         }
     }
-    //latest additions..
-    public SNode<T> get() {
-        SNode<T> temp = null;
-        try {
-            temp = atomic.openRead();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return temp;
-    }
 
-    public void set(SNode<T> temp) {
-        try {
-            atomic.openWrite();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

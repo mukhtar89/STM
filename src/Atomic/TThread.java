@@ -1,13 +1,10 @@
-package STM;
+package STM.Atomic;
 
-import STM.Atomic.Copyable;
-import STM.Atomic.LockObject;
-import STM.Atomic.ReadSet;
-import STM.Atomic.WriteSet;
-import STM.ContentionManagers.BackOffManager;
-import STM.ContentionManagers.ContentionManager;
+import STM.ContentionManagers.*;
 import STM.Exceptions.AbortedException;
 import STM.Exceptions.PanicException;
+import STM.Transaction;
+import STM.VersionClock;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -26,7 +23,7 @@ public class TThread  {
 		while (true) {
 			Transaction me = new Transaction();
 			Transaction.setLocal(me);
-			ContentionManager.setLocal(new BackOffManager());
+			ContentionManager.setLocal(new KarmaManager());
 			try {
 				result = xaction.call();
 				LOGGER.info("XACTION call is made");
@@ -73,6 +70,7 @@ public class TThread  {
 					source.copyTo(destination);
 					LOGGER.info("WRTING OBJECT VALUE");
 					key.stamp = writeVersion;
+					Transaction.getLocal().incrementFinished();
 				}
 				writeSet.unlock();
 				writeSet.clear();
@@ -95,7 +93,8 @@ public class TThread  {
 			for (LockObject<?> x : readSet.getList()) {
 				if (x.lock.isLocked() && !x.lock.isHeldByCurrentThread()) {
 					LOGGER.info("Object locked and held, ContentionManagers.ContentionManager called");
-					ContentionManager.getLocal().resolve(Transaction.getLocal(), x.creator);
+					ContentionManager.getLocal().resolve(Transaction.getLocal(), x.locker);
+					Thread.yield();
 				}
 				if (x.stamp > VersionClock.getReadStamp()) {
 					LOGGER.info("Stamp > Version CLOCK");

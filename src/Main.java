@@ -1,7 +1,7 @@
 package STM;
 
+import STM.Atomic.TThread;
 import STM.DataStructure.TLinkedList;
-import STM.DataStructure.TransactionalLinkedList;
 
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 
 public class Main {
 	
-	//public static TransactionalLinkedList<Integer> linkedList = new TransactionalLinkedList<>(Integer.MIN_VALUE, Integer.MAX_VALUE);
 	public static TLinkedList<Integer> linkedList = new TLinkedList<>();
 	private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
