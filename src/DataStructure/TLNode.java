@@ -3,6 +3,7 @@ package STM.DataStructure;
 import STM.Atomic.AtomicObject;
 import STM.Atomic.LockObject;
 import STM.Exceptions.AbortedException;
+import java.util.logging.Logger;
 
 /**
  * Created by Mukhtar on 11/3/2015.
@@ -13,13 +14,18 @@ public class TLNode<T> implements LNode<T> {
     public TLNode(T myItem) {
         atomic = new LockObject<>(new SLNode<>(myItem));
     }
+    private static Logger LOGGER = Logger.getLogger(TLNode.class.getName());
 
     @Override
     public T getItem() {
         T item = null;
         try {
             item = atomic.openRead().getItem();
-        } catch (Exception e) {
+        }
+        catch (AbortedException e) {
+            LOGGER.info("getItem openRead throwing AbortedException");
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -28,7 +34,11 @@ public class TLNode<T> implements LNode<T> {
     public void setItem(T value) {
         try {
             atomic.openWrite().setItem(value);
-        } catch (Exception e) {
+        }
+        catch (AbortedException e) {
+            LOGGER.info("setItem openWrite throwing AbortedException");
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -39,7 +49,11 @@ public class TLNode<T> implements LNode<T> {
             retNode = atomic.openRead().getNext();
             if (!atomic.validate())
                 throw new AbortedException();
-        } catch (Exception e) {
+        }
+        catch (AbortedException e) {
+            LOGGER.info("getNext openRead throwing AbortedException");
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
         return retNode;
@@ -51,7 +65,11 @@ public class TLNode<T> implements LNode<T> {
             retNode = atomic.openRead().getPrev();
             if (!atomic.validate())
                 throw new AbortedException();
-        } catch (Exception e) {
+        }
+        catch (AbortedException e) {
+            LOGGER.info("getPrev openRead throwing AbortedException");
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
         return retNode;
@@ -60,7 +78,11 @@ public class TLNode<T> implements LNode<T> {
     public void setNext(LNode<T> value) {
         try {
             atomic.openWrite().setNext(value);
-        } catch (Exception e) {
+        }
+        catch (AbortedException e) {
+            LOGGER.info("setNext openWrite throwing AbortedException");
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -68,7 +90,11 @@ public class TLNode<T> implements LNode<T> {
     public void setPrev(LNode<T> value) {
         try {
             atomic.openWrite().setPrev(value);
-        } catch (Exception e) {
+        }
+        catch (AbortedException e) {
+            LOGGER.info("setPrev openWrite throwing AbortedException");
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

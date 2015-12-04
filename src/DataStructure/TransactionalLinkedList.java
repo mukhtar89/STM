@@ -28,7 +28,7 @@ public class TransactionalLinkedList<T> {
         temp.setNext(tail);
         temp.setPrev(last_node);
         tail.setPrev(temp);
-        LOGGER.info("attempting add request with val:=  " + value + "!!");
+        LOGGER.info(Thread.currentThread().getName() + "..attempting add request with val:=  " + value + "!!");
     }
 
     public Boolean remove(T value) {
@@ -48,17 +48,17 @@ public class TransactionalLinkedList<T> {
             after_last_node = last_node.getNext();
             before_last_node.setNext(after_last_node);
             after_last_node.setPrev(before_last_node);
-            LOGGER.info("Removal attempt successful!");
+            LOGGER.severe(Thread.currentThread().getName() + "..Removal attempt successful!");
             //last_node = null;
         }
-        else { LOGGER.info("Removal attempt failed.. :("); }
+        else { LOGGER.severe(Thread.currentThread().getName() + "..Removal attempt failed.. :("); }
         return status;
     }
 
     public void printAll() {
-        LNode<T> runner = head;
-        while (runner.getNext() != null) {
-            System.out.print(runner.getItem() + ",");
+        LNode<T> runner = head.getNext();
+        while (runner.getNext() != tail) {
+            LOGGER.severe((Integer) runner.getItem() + ", ");
             runner = runner.getNext();
         }
     }
