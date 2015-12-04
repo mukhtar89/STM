@@ -8,11 +8,12 @@ import STM.VersionClock;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 
-public class TThread  {
+public class TThread extends Thread {
 
 	private final int TIMEOUT = 10;
 	private static final Logger LOGGER = Logger.getLogger(TThread.class.getName());
