@@ -17,7 +17,7 @@ public class Main {
 	public static TLinkedList<Integer> linkedList = new TLinkedList<>();
 	private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
-	private static Integer NUM_THREADS = 100;
+	private static Integer NUM_THREADS = 50;
 	
 	public static class Produce<T> implements Callable<T> {
 		
@@ -54,7 +54,7 @@ public class Main {
 	}
 
     public static void main(String[] args) throws Exception {
-		ExecutorService executor = Executors.newFixedThreadPool(8);
+		ExecutorService executor = Executors.newFixedThreadPool(4);
         Random random = new Random();
         for (int i=0; i<NUM_THREADS; i++) {
         	int inserted = random.nextInt(i+1);
@@ -64,8 +64,8 @@ public class Main {
         	}
         }
 		executor.shutdown();
-		TimeUnit.SECONDS.sleep(3);
-		linkedList.printAll();
+		//TimeUnit.SECONDS.sleep(3);
+		//linkedList.printAll();
     }
 
 	public static class WorkerThread implements Runnable {

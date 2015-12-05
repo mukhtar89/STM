@@ -1,12 +1,14 @@
 package STM.Atomic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class ReadSet {
 
-	static List<LockObject<?>> dataSet = new ArrayList<>();
+	private List<LockObject<?>> list = new ArrayList<>();
 	static ThreadLocal<ReadSet> local = new ThreadLocal<ReadSet>() {
 		protected ReadSet initialValue() {
 			return new ReadSet();
@@ -24,15 +26,15 @@ public class ReadSet {
 	
 	public void add(LockObject<?> lockObj) {
 		LOGGER.info("Adding object to Atomic.ReadSet");
-		if (!dataSet.contains(lockObj))
-			dataSet.add(lockObj);
+		if (!list.contains(lockObj))
+			list.add(lockObj);
 	}
 
 	public List<LockObject<?>> getList() {
-		return dataSet;
+		return list;
 	}
 
 	public void clear() {
-		dataSet.clear();
+		list.clear();
 	}
 }

@@ -8,7 +8,6 @@ import STM.VersionClock;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -24,13 +23,15 @@ public class TThread extends Thread {
 		while (true) {
 			Transaction me = new Transaction();
 			Transaction.setLocal(me);
-			ContentionManager.setLocal(new PoliteManager());
+			ContentionManager.setLocal(new PublishedTimestamp());
 			try {
 				result = xaction.call();
 				LOGGER.info("XACTION call is made");
-			} catch (AbortedException e) {
-			} catch (Exception e) {
-				throw new PanicException(e);
+			} catch (AbortedException | PanicException e) {
+				me.abort();
+				onAbort.run();
+				LOGGER.info("Transaction ABORTED from EXCEPTION");
+				continue;
 			}
 			if (onValidate.call()) {
 				LOGGER.info("OnValidate function ");
@@ -69,9 +70,9 @@ public class TThread extends Thread {
 					Copyable<?> destination = key.openRead();
 					Copyable<Copyable<?>> source = (Copyable<Copyable<?>>) entry.getValue();
 					source.copyTo(destination);
-					LOGGER.info("WRTING OBJECT VALUE");
+					LOGGER.info("WRITING OBJECT VALUE");
 					key.stamp = writeVersion;
-					Transaction.getLocal().incrementFinished();
+					Transaction.getLocal().clearKarma();
 				}
 				writeSet.unlock();
 				writeSet.clear();
@@ -99,7 +100,7 @@ public class TThread extends Thread {
 					return false;
 				}
 				if (x.stamp > VersionClock.getReadStamp()) {
-					LOGGER.info("Stamp > Version CLOCK");
+					LOGGER.info("Stamp: " + x.stamp + " > Version CLOCK: " + VersionClock.getReadStamp());
 					return false;
 				}
 			}

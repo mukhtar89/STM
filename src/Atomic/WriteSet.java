@@ -9,29 +9,24 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class WriteSet {
-	
-	static Map<LockObject<?>, Object> dataSet = new HashMap<LockObject<?>, Object>();
-	static ThreadLocal<Map<LockObject<?>, Object>> map = new ThreadLocal<Map<LockObject<?>, Object>>() {
-		protected synchronized Map<LockObject<?>, Object> initialValue() {
-			return new HashMap<>();
-		}
-	};
+
+	private Map<LockObject<?>, Object> map = new HashMap<>();
 	static ThreadLocal<WriteSet> local = new ThreadLocal<WriteSet>() {
 		protected WriteSet initialValue() {
 			return new WriteSet();
 		}
 	};
-	
+
 	public Object get(LockObject<?> x) {
-		return map.get().get(x);
+		return map.get(x);
 	}
-	
+
 	public void put(LockObject<?> x, Object y) {
-		map.get().put(x, y);
+		map.put(x, y);
 	}
-	
+
 	public boolean tryLock(long timeout, TimeUnit timeUnit) {
-		for (LockObject<?> x : map.get().keySet()) {
+		for (LockObject<?> x : map.keySet()) {
 			while (!x.tryLock(timeout, timeUnit)) {
 				ContentionManager.getLocal().resolve(Transaction.getLocal(), x.locker);
 				Thread.yield();
@@ -39,26 +34,26 @@ public class WriteSet {
 		}
 		return true;
 	}
-	
+
 	public void unlock() {
-		for (LockObject<?> x : map.get().keySet()) {
+		for (LockObject<?> x : map.keySet()) {
 			x.unlock();
 		}
 	}
-	
+
 	public static WriteSet getLocal() {
 		return local.get();
 	}
-	
+
 	public static void setLocal(WriteSet writeSet) {
 		local.set(writeSet);
 	}
-	
+
 	public Set<Map.Entry<LockObject<?>, Object>>  getList() {
-		return dataSet.entrySet();
+		return map.entrySet();
 	}
 
 	public void clear() {
-		dataSet.clear();
+		map.clear();
 	}
 }

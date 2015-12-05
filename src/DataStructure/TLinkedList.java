@@ -1,22 +1,21 @@
 package STM.DataStructure;
 
-import java.util.HashMap;
+import STM.Exceptions.AbortedException;
+import STM.Exceptions.PanicException;
+
 import java.util.logging.Logger;
 
 public class TLinkedList<T> {
 	
 	private Node<T> head;
-	public HashMap<T, Node<T>> nodeMap;
 	private static Logger LOGGER = Logger.getLogger(TLinkedList.class.getName());
 	
 	public TLinkedList () {
 		head = new TNode<>(null);
-		nodeMap = new HashMap<>();
 	}
 	
-	public void add(T value) {
+	public void add(T value) throws AbortedException, PanicException {
 		Node<T> temp = new TNode<>(value);
-		nodeMap.put(value, temp);
 		if (head.getNext() == null)
 			head.setNext(temp);
 		else {
@@ -27,7 +26,7 @@ public class TLinkedList<T> {
 		}
 	}
 	
-	public boolean remove(T value) {
+	public boolean remove(T value) throws AbortedException, PanicException {
 		if (head.getNext() == null)
 			return false;
 		Node<T> runner = head;
@@ -42,7 +41,7 @@ public class TLinkedList<T> {
 		return false;
 	}
 
-	public void printAll() {
+	public void printAll() throws AbortedException, PanicException {
 		LOGGER.info("NOW PRINTING.......................................!!!!!!!");
 		Node<T> runner = head;
 		while (runner.getNext() != null) {

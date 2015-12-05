@@ -1,21 +1,25 @@
 package STM;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Transaction {
 	
 	public enum Status {ABORTED, ACTIVE, COMMITTED};
-	//public static Transaction COMMITTED = new Transaction(Status.COMMITTED);
 	private final AtomicReference<Status> status;
-	private AtomicInteger finished = new AtomicInteger(0);
+	private AtomicInteger karma = new AtomicInteger(0);
+	private AtomicInteger erupt = new AtomicInteger(0);
+	public long threshold = 1L;
 	static ThreadLocal<Transaction> local = new ThreadLocal<Transaction>() {
 		protected Transaction initialValue() {
 			return new Transaction(Status.COMMITTED);
 		}
 	};
 
-	public long timestampStart = VersionClock.getGlobalStamp();
+	public AtomicLong timestampStart = new AtomicLong(VersionClock.getGlobalStamp());
+	public AtomicLong recency = new AtomicLong(VersionClock.getGlobalStamp());
+	public Thread thread = Thread.currentThread();
 	
 	public Transaction() {
 		status = new AtomicReference<Status>(Status.ACTIVE);
@@ -34,6 +38,9 @@ public class Transaction {
 	}
 	
 	public boolean abort() {
+		if (threshold < 2000000000)
+			threshold++;
+		else threshold = 0L;
 		return status.compareAndSet(Status.ACTIVE, Status.ABORTED);
 	}
 	
@@ -45,12 +52,26 @@ public class Transaction {
 		local.set(transaction);
 	}
 
-	public Integer getFinished() {
-		return finished.get();
+	public Integer getKarma() {
+		return karma.get();
 	}
 
-	public void incrementFinished() {
-		finished.getAndIncrement();
+	public void incrementKarma() {
+		karma.getAndIncrement();
+	}
+
+	public void clearKarma() {
+		karma.set(0);
+	}
+
+	public int getErupt() {
+		if (erupt.get() == 0)
+			erupt.set(karma.get());
+		return erupt.get();
+	}
+
+	public void setErupt(int value) {
+		erupt.set(value);
 	}
 
 }

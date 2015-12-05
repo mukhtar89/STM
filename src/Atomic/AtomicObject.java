@@ -1,5 +1,8 @@
 package STM.Atomic;
 
+import STM.Exceptions.AbortedException;
+import STM.Exceptions.PanicException;
+
 /**
  * Created by Mukhtar on 11/3/2015.
  */
@@ -10,7 +13,7 @@ public abstract class AtomicObject<T extends Copyable<T>> {
         internalInit = init;
         internalClass = init.getClass();
     }
-    public abstract T openRead() throws Exception;
-    public abstract T openWrite() throws Exception;
+    public abstract T openRead() throws AbortedException, PanicException;
+    public abstract T openWrite() throws AbortedException, PanicException;
     public abstract boolean validate();
 }
